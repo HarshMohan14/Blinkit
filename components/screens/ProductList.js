@@ -43,7 +43,7 @@ export default function ProductList ({ navigation })  {
    if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#2ecc71" />
+        <ActivityIndicator size="large" color="green" />
         <Text style={styles.loadingText}>Loading products...</Text>
       </View>
     );
