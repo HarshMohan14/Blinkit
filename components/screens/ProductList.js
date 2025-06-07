@@ -5,12 +5,15 @@ import {
   Text,
   Image,
   TouchableOpacity,
+  ActivityIndicator
 } from 'react-native';
 import { useCart } from '../../context/CartProvider';
 import { useEffect, useState } from 'react';
 
 export default function ProductList ({ navigation })  {
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const { addToCart } = useCart();
 
   const handleAddToCart=(item)=>
@@ -18,12 +21,42 @@ export default function ProductList ({ navigation })  {
     addToCart(item)
   }
   useEffect(() => {
+    setLoading(true);
+    setError(null);
     fetch('https://fakestoreapi.in/api/products')
-      .then((res) => res.json())
-      .then((data) => {setProducts(data.products)
-      console.log(data);
+      .then(res => {
+        if (!res.ok) {
+          throw new Error('Failed to fetch products');
+        }
+        return res.json();
+      })
+      .then(data => {
+        setProducts(data.products);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
       });
   }, []);
+;
+   if (loading) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator size="large" color="#2ecc71" />
+        <Text style={styles.loadingText}>Loading products...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.errorText}>{error}</Text>
+        <Text style={styles.errorText}>Please try again later</Text>
+      </View>
+    );
+  }
   const renderItem = ({ item }) => (
     <TouchableOpacity style={styles.itemContainer} onPress={()=>navigation.navigate('ProductDetails',{product:item})}>
       <Image source={{ uri: item.image }} style={styles.image} />
